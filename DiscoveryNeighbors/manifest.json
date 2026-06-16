@@ -1,0 +1,20 @@
+{
+    "manifest_version": 2.0,
+    "id": "discovery_neighbors_popup",
+    "name": "Discovery Neighbors Popup",
+    "version": "1.0.0",
+    "namespace": "DiscoveryNeighbors",
+    "author": "Peterson Basso",
+    "description": "Exibe vizinhos de rede LLDP/CDP/EDP via SNMP em tempo real no popup de host.",
+    "actions": {
+        "menu.popup": {
+            "class": "MenuPopupExtended",
+            "layout": "layout.json"
+        },
+        "discovery.popup": {
+            "class": "DiscoveryPopup",
+            "view": "popup.view",
+            "layout": "layout.json"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+# Logs e arquivos temporários
+*.log
+/tmp/
+
+# Configurações do Antigravity IDE (AG Kit)
+.agents/
+.temp_ag_kit/
+
+# Configurações de IDEs locais
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
