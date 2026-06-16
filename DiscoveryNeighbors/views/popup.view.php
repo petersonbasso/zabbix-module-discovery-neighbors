@@ -7,18 +7,25 @@
 
 $json_flags = defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0;
 
+$lang = isset(\CWebUser::$data['lang']) ? \CWebUser::$data['lang'] : 'en_US';
+$is_pt = (strpos($lang, 'pt_') === 0);
+
+$t = function(string $pt, string $en) use ($is_pt): string {
+	return $is_pt ? $pt : $en;
+};
+
 $table = new CTableInfo();
 $table->setHeader([
-	'Protocolo',
-	'Porta Local',
-	'Equipamento Vizinho',
-	'IP Vizinho',
-	'Porta Vizinha'
+	$t('Protocolo', 'Protocol'),
+	$t('Porta Local', 'Local Port'),
+	$t('Equipamento Vizinho', 'Neighbor Device'),
+	$t('IP Vizinho', 'Neighbor IP'),
+	$t('Porta Vizinha', 'Neighbor Port')
 ]);
 
 if (!empty($data['neighbors'])) {
 	foreach ($data['neighbors'] as $neighbor) {
-		$full_name = $neighbor['neighbor_name'] !== '' ? $neighbor['neighbor_name'] : '(Desconhecido)';
+		$full_name = $neighbor['neighbor_name'] !== '' ? $neighbor['neighbor_name'] : $t('(Desconhecido)', '(Unknown)');
 		$display_name = mb_strlen($full_name) > 25 ? mb_substr($full_name, 0, 22) . '...' : $full_name;
 
 		$neighbor_name_cell = $display_name;
@@ -26,14 +33,14 @@ if (!empty($data['neighbors'])) {
 			$neighbor_name_cell = (new CLink($display_name, '#'))
 				->addClass('navigate-host')
 				->setAttribute('data-hostid', $neighbor['neighbor_hostid'])
-				->setAttribute('title', 'Navegar para ' . $full_name);
+				->setAttribute('title', $t('Navegar para ', 'Navigate to ') . $full_name);
 		} elseif (!empty($neighbor['neighbor_ip']) && $neighbor['neighbor_ip'] !== '-' && !empty($neighbor['is_distribution'])) {
 			$neighbor_name_cell = (new CLink($display_name, '#'))
 				->addClass('navigate-host')
 				->setAttribute('data-ip', $neighbor['neighbor_ip'])
 				->setAttribute('data-community', isset($data['community']) ? $data['community'] : 'public')
 				->setAttribute('data-version', isset($data['version']) ? $data['version'] : 2)
-				->setAttribute('title', 'Consultar vizinhos via IP ' . $neighbor['neighbor_ip'] . ' (' . $full_name . ')');
+				->setAttribute('title', $t('Consultar vizinhos via IP ', 'Query neighbors via IP ') . $neighbor['neighbor_ip'] . ' (' . $full_name . ')');
 		} else {
 			$neighbor_name_cell = (new CSpan($display_name))->setAttribute('title', $full_name);
 		}
@@ -47,7 +54,7 @@ if (!empty($data['neighbors'])) {
 	}
 } else {
 	// Exibe mensagem de erro amigável caso ocorra erro ou a tabela de vizinhos esteja vazia
-	$no_data_msg = !empty($data['error']) ? $data['error'] : 'Nenhum vizinho de rede detectado (LLDP/CDP/EDP).';
+	$no_data_msg = !empty($data['error']) ? $data['error'] : $t('Nenhum vizinho de rede detectado (LLDP/CDP/EDP).', 'No network neighbors detected (LLDP/CDP/EDP).');
 	$table->setNoDataMessage($no_data_msg);
 }
 
@@ -276,7 +283,7 @@ if (!empty($data['neighbors'])) {
 		}
 	</style>
 	<div class="topology-wrapper" id="wrapper-' . $uniqid . '">
-		<div class="topology-info-bar" id="info-' . $uniqid . '">Passe o mouse nos elementos para ver os detalhes</div>
+		<div class="topology-info-bar" id="info-' . $uniqid . '">' . $t('Passe o mouse nos elementos para ver os detalhes', 'Hover over elements to view details') . '</div>
 		<svg class="topology-svg" id="svg-' . $uniqid . '"></svg>
 	</div>';
 }
@@ -296,6 +303,16 @@ if (!empty($data['neighbors'])) {
 		const svg = document.getElementById("svg-' . $uniqid . '");
 		const infoBar = document.getElementById("info-' . $uniqid . '");
 		if (!svg || !infoBar || !wrapper) return;
+
+		const t = {
+			connectionActive: ' . json_encode($t('1 conexão ativa', '1 active connection'), $json_flags) . ',
+			connectionsActive: ' . json_encode($t('conexões ativas', 'active connections'), $json_flags) . ',
+			hoverDetails: ' . json_encode($t('Passe o mouse nos elementos para ver os detalhes', 'Hover over elements to view details'), $json_flags) . ',
+			clickNavigate: ' . json_encode($t('Clique para navegar para ', 'Click to navigate to '), $json_flags) . ',
+			queryIp: ' . json_encode($t('Consultar vizinhos via IP ', 'Query neighbors via IP '), $json_flags) . ',
+			fullscreen: ' . json_encode($t('Tela Cheia', 'Fullscreen'), $json_flags) . ',
+			exitFullscreen: ' . json_encode($t('Sair da Tela Cheia', 'Exit Fullscreen'), $json_flags) . '
+		};
 
 		console.log("DiscoveryNeighbors Popup Loaded:");
 		console.log(" - csrfToken from PHP:", csrfToken ? "EXISTS" : "EMPTY");
@@ -372,7 +389,7 @@ if (!empty($data['neighbors'])) {
 		// Botão de Tela Cheia
 		const fullscreenBtn = document.createElement("button");
 		fullscreenBtn.className = "topology-fullscreen-btn";
-		fullscreenBtn.title = "Tela Cheia";
+		fullscreenBtn.title = t.fullscreen;
 		fullscreenBtn.innerHTML = `
 			<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -386,7 +403,7 @@ if (!empty($data['neighbors'])) {
 
 			if (!document.fullscreenElement) {
 				popupElement.requestFullscreen().catch(err => {
-					console.error("Erro ao entrar em tela cheia:", err);
+					console.error("Error entering fullscreen:", err);
 				});
 			} else {
 				document.exitFullscreen();
@@ -472,13 +489,13 @@ if (!empty($data['neighbors'])) {
 
 			centerG.addEventListener("mouseover", () => {
 				centerG.classList.add("focused");
-				const connText = neighbors.length === 1 ? "1 conexão ativa" : `${neighbors.length} conexões ativas`;
+				const connText = neighbors.length === 1 ? t.connectionActive : `${neighbors.length} ${t.connectionsActive}`;
 				infoBar.textContent = `${hostName} | (${connText})`;
 				infoBar.style.borderColor = "#60a5fa";
 			});
 			centerG.addEventListener("mouseout", () => {
 				centerG.classList.remove("focused");
-				infoBar.textContent = "Passe o mouse nos elementos para ver os detalhes";
+				infoBar.textContent = t.hoverDetails;
 				infoBar.style.borderColor = "";
 			});
 
@@ -528,7 +545,7 @@ if (!empty($data['neighbors'])) {
 					nodeG.setAttribute("data-hostid", hostid);
 					
 					const nodeTitle = document.createElementNS(ns, "title");
-					nodeTitle.textContent = "Clique para navegar para " + name;
+					nodeTitle.textContent = t.clickNavigate + name;
 					nodeG.appendChild(nodeTitle);
 
 					nodeG.addEventListener("click", (e) => {
@@ -542,7 +559,7 @@ if (!empty($data['neighbors'])) {
 					nodeG.setAttribute("data-version", queryVersion);
 					
 					const nodeTitle = document.createElementNS(ns, "title");
-					nodeTitle.textContent = "Consultar vizinhos via IP " + ip;
+					nodeTitle.textContent = t.queryIp + ip;
 					nodeG.appendChild(nodeTitle);
 
 					nodeG.addEventListener("click", (e) => {
@@ -579,7 +596,7 @@ if (!empty($data['neighbors'])) {
 						lg.classList.remove("focused");
 					});
 
-					infoBar.textContent = "Passe o mouse nos elementos para ver os detalhes";
+					infoBar.textContent = t.hoverDetails;
 					infoBar.style.borderColor = "";
 				});
 
@@ -667,7 +684,7 @@ if (!empty($data['neighbors'])) {
 							nodeGroups[name].classList.remove("focused");
 						}
 
-						infoBar.textContent = "Passe o mouse nos elementos para ver os detalhes";
+						infoBar.textContent = t.hoverDetails;
 						infoBar.style.borderColor = "";
 					});
 
@@ -753,14 +770,14 @@ if (!empty($data['neighbors'])) {
 						<path d="M4 14h6v6m10-6h-6v6M4 10h6V4m10 6h-6V4"/>
 					</svg>
 				`;
-				fullscreenBtn.title = "Sair da Tela Cheia";
+				fullscreenBtn.title = t.exitFullscreen;
 			} else {
 				fullscreenBtn.innerHTML = `
 					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
 					</svg>
 				`;
-				fullscreenBtn.title = "Tela Cheia";
+				fullscreenBtn.title = t.fullscreen;
 			}
 			setTimeout(drawTopology, 50);
 		};
@@ -779,11 +796,11 @@ if (!empty($data['neighbors'])) {
 
 // Estrutura JSON requerida pelo Zabbix para renderização do popup Overlay (Modal)
 $output = [
-	'header' => 'Vizinhos de Rede (Real-Time) - ' . (!empty($data['host_name']) ? $data['host_name'] : ''),
+	'header' => $t('Vizinhos de Rede (Real-Time)', 'Network Neighbors (Real-Time)') . ' - ' . (!empty($data['host_name']) ? $data['host_name'] : ''),
 	'body' => $html,
 	'buttons' => [
 		[
-			'title' => 'Fechar',
+			'title' => $t('Fechar', 'Close'),
 			'class' => 'btn-alt',
 			'keepOpen' => false,
 			'isSubmit' => false,

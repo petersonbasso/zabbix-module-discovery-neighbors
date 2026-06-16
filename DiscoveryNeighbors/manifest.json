@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "namespace": "DiscoveryNeighbors",
     "author": "Peterson Basso",
-    "description": "Exibe vizinhos de rede LLDP/CDP/EDP via SNMP em tempo real no popup de host.",
+    "description": "Displays real-time LLDP/CDP/EDP network neighbors via SNMP in host context menu popups.",
     "actions": {
         "menu.popup": {
             "class": "MenuPopupExtended",

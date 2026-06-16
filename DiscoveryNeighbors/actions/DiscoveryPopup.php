@@ -85,7 +85,7 @@ class DiscoveryPopup extends CController {
 			$this->logDebug("doAction: php-snmp extension is NOT loaded!");
 			$this->setResponse(new CControllerResponseData([
 				'neighbors' => [],
-				'error' => 'A extensão PHP SNMP não está instalada ou ativada no servidor web.'
+				'error' => $this->translate('extension_error')
 			]));
 			return;
 		}
@@ -119,7 +119,7 @@ class DiscoveryPopup extends CController {
 					$this->logDebug(sprintf("doAction: Host not found. Time taken: %.4fs", microtime(true) - $step_start));
 					$this->setResponse(new CControllerResponseData([
 						'neighbors' => [],
-						'error' => 'Host não encontrado ou permissão negada.'
+						'error' => $this->translate('host_not_found')
 					]));
 					return;
 				}
@@ -141,7 +141,7 @@ class DiscoveryPopup extends CController {
 					$this->logDebug("doAction: Host " . $host['name'] . " does not have any SNMP interfaces");
 					$this->setResponse(new CControllerResponseData([
 						'neighbors' => [],
-						'error' => 'O host não possui nenhuma interface SNMP configurada.'
+						'error' => $this->translate('no_snmp_interface')
 					]));
 					return;
 				}
@@ -201,7 +201,7 @@ class DiscoveryPopup extends CController {
 
 			// Tratamento de falha caso nenhum dado tenha sido retornado
 			if (empty($neighbors)) {
-				$error_message = 'Não foi possível ler dados SNMP do host. Verifique se o equipamento está online e se as credenciais de comunidade SNMP estão corretas.';
+				$error_message = $this->translate('snmp_read_error');
 				$this->logDebug("doAction: No network neighbors found.");
 			} else {
 				// Mapeia os vizinhos a hosts existentes no Zabbix por Nome/IP
@@ -231,10 +231,50 @@ class DiscoveryPopup extends CController {
 
 			$this->setResponse(new CControllerResponseData([
 				'neighbors' => [],
-				'error' => 'Ocorreu um erro interno durante a consulta: ' . $e->getMessage(),
+				'error' => $this->translate('internal_error') . $e->getMessage(),
 				'host_name' => $host_name,
 				'csrf_token' => $csrf_token
 			]));
 		}
+	}
+
+	/**
+	 * Retorna a string traduzida com base no idioma do usuário no Zabbix.
+	 *
+	 * @param string $key
+	 * @return string
+	 */
+	private function translate(string $key): string {
+		$lang = isset(\CWebUser::$data['lang']) ? \CWebUser::$data['lang'] : 'en_US';
+		$is_pt = (strpos($lang, 'pt_') === 0);
+
+		$translations = [
+			'extension_error' => [
+				'pt' => 'A extensão PHP SNMP não está instalada ou ativada no servidor web.',
+				'en' => 'The PHP SNMP extension is not installed or enabled on the web server.'
+			],
+			'host_not_found' => [
+				'pt' => 'Host não encontrado ou permissão negada.',
+				'en' => 'Host not found or access denied.'
+			],
+			'no_snmp_interface' => [
+				'pt' => 'O host não possui nenhuma interface SNMP configurada.',
+				'en' => 'The host does not have any SNMP interfaces configured.'
+			],
+			'snmp_read_error' => [
+				'pt' => 'Não foi possível ler dados SNMP do host. Verifique se o equipamento está online e se as credenciais de comunidade SNMP estão corretas.',
+				'en' => 'Unable to read SNMP data from host. Verify if the device is online and if the SNMP community credentials are correct.'
+			],
+			'internal_error' => [
+				'pt' => 'Ocorreu um erro interno durante a consulta: ',
+				'en' => 'An internal error occurred during the query: '
+			]
+		];
+
+		if (isset($translations[$key])) {
+			return $is_pt ? $translations[$key]['pt'] : $translations[$key]['en'];
+		}
+
+		return $key;
 	}
 }

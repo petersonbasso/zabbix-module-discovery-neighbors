@@ -45,9 +45,13 @@ class MenuPopupExtended extends CControllerMenuPopup {
 							$main_block_data['data']['urls'] = [];
 						}
 
-						// Injeta a opção "Ver Vizinhos (LLDP/CDP)" no menu "Links"
+						// Injeta a opção no menu "Links" traduzida conforme o idioma do usuário
+						$label = (isset(\CWebUser::$data['lang']) && strpos(\CWebUser::$data['lang'], 'pt_') === 0)
+							? 'Ver Vizinhos (LLDP/CDP)'
+							: 'View Neighbors (LLDP/CDP)';
+
 						$main_block_data['data']['urls'][] = [
-							'label' => 'Ver Vizinhos (LLDP/CDP)',
+							'label' => $label,
 							'url' => 'zabbix.php?action=discovery.popup&hostid=' . $hostid,
 							'menu_path' => ''
 						];
