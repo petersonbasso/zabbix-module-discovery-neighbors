@@ -60,9 +60,9 @@ The module performs on-demand SNMP queries directly from the Zabbix web server t
    cd /usr/share/zabbix/modules/
    ```
 
-2. Clone this repository into a folder named `discovery_neighbors_popup`:
+2. Clone this repository directly:
    ```bash
-   git clone https://github.com/your-username/discovery_neighbors_popup.git discovery_neighbors_popup
+   git clone https://github.com/petersonbasso/zabbix-module-discovery-neighbors.git
    ```
 
 3. Ensure the web server user (e.g., `www-data` or `nginx`) has read permissions for the module directory.
