@@ -278,13 +278,13 @@ class SnmpDiscoveryService {
 		$lldp_descs = $this->snmpWalk($ip, $community, '1.0.8802.1.1.2.1.4.1.1.8', $version);
 		$lldp_ips = $this->snmpWalk($ip, $community, '1.0.8802.1.1.2.1.4.2.1.3', $version);
 
-		// Mapeamento de lldpLocPortNum para ifIndex (importante para Extreme Networks/ExtremeXOS)
+		// Mapeamento de lldpLocPortNum para lldpLocPortId (contém o nome real da porta local no LLDP-MIB, ex: 1:34)
 		$lldp_loc_ports = $this->snmpWalk($ip, $community, '1.0.8802.1.1.2.1.3.7.1.3', $version);
-		$lldp_loc_port_to_ifindex = [];
+		$lldp_loc_port_ids = [];
 		foreach ($lldp_loc_ports as $key => $val) {
 			$parts = explode('.', $key);
 			$lldp_loc_port_num = end($parts);
-			$lldp_loc_port_to_ifindex[$lldp_loc_port_num] = $val;
+			$lldp_loc_port_ids[$lldp_loc_port_num] = $val;
 		}
 
 		// Indexa tabelas por sufixo normalizado (LocalPortNum.RemIndex)
@@ -402,12 +402,20 @@ class SnmpDiscoveryService {
 				$neighbor_port .= ' (' . $remote_desc . ')';
 			}
 
-			// Tenta converter o índice de porta local do LLDP para ifIndex usando o mapeamento do LLDP-MIB
-			$if_index = isset($lldp_loc_port_to_ifindex[$local_port_index]) 
-				? $lldp_loc_port_to_ifindex[$local_port_index] 
-				: $local_port_index;
+			// Tenta obter o nome amigável da porta local diretamente do lldpLocPortId do LLDP-MIB
+			$local_port_name = '';
+			if (isset($lldp_loc_port_ids[$local_port_index])) {
+				$candidate = $lldp_loc_port_ids[$local_port_index];
+				// Se for uma string ASCII válida e não for um endereço MAC, usa diretamente
+				if (preg_match('/^[a-zA-Z0-9\-_.\/\(\)\s\:]+$/', $candidate) && !preg_match('/([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}/', $candidate)) {
+					$local_port_name = $candidate;
+				}
+			}
 
-			$local_port_name = isset($if_map[$if_index]) ? $if_map[$if_index] : $local_port_index;
+			// Se não conseguiu pelo lldpLocPortId, faz o fallback para o if_map padrão usando local_port_index como ifIndex
+			if ($local_port_name === '') {
+				$local_port_name = isset($if_map[$local_port_index]) ? $if_map[$local_port_index] : $local_port_index;
+			}
 			$local_port_display = ($local_port_name != $local_port_index) ? $local_port_name . ' (' . $local_port_index . ')' : $local_port_index;
 
 			$display_name = $neighbor_name;
