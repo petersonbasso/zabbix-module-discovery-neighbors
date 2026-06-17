@@ -57,6 +57,7 @@ class ZabbixApiResolver {
 				$db_hosts = API::Host()->get([
 					'output' => ['hostid', 'name', 'host'],
 					'search' => ['name' => array_keys($neighbor_names)],
+					'searchByAny' => true,
 					'selectInterfaces' => ['ip', 'main', 'type', 'useip']
 				]);
 				$this->log("ZabbixApiResolver: Visible name search result: " . json_encode($db_hosts));
@@ -95,6 +96,7 @@ class ZabbixApiResolver {
 					$db_hosts_tech = API::Host()->get([
 						'output' => ['hostid', 'name', 'host'],
 						'search' => ['host' => $remaining_names],
+						'searchByAny' => true,
 						'selectInterfaces' => ['ip', 'main', 'type', 'useip']
 					]);
 					$this->log("ZabbixApiResolver: Technical name search result: " . json_encode($db_hosts_tech));
