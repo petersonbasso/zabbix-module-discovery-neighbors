@@ -278,6 +278,15 @@ class SnmpDiscoveryService {
 		$lldp_descs = $this->snmpWalk($ip, $community, '1.0.8802.1.1.2.1.4.1.1.8', $version);
 		$lldp_ips = $this->snmpWalk($ip, $community, '1.0.8802.1.1.2.1.4.2.1.3', $version);
 
+		// Mapeamento de lldpLocPortNum para ifIndex (importante para Extreme Networks/ExtremeXOS)
+		$lldp_loc_ports = $this->snmpWalk($ip, $community, '1.0.8802.1.1.2.1.3.7.1.3', $version);
+		$lldp_loc_port_to_ifindex = [];
+		foreach ($lldp_loc_ports as $key => $val) {
+			$parts = explode('.', $key);
+			$lldp_loc_port_num = end($parts);
+			$lldp_loc_port_to_ifindex[$lldp_loc_port_num] = $val;
+		}
+
 		// Indexa tabelas por sufixo normalizado (LocalPortNum.RemIndex)
 		$lldp_ports_indexed = [];
 		foreach ($lldp_ports as $key => $val) {
@@ -393,7 +402,12 @@ class SnmpDiscoveryService {
 				$neighbor_port .= ' (' . $remote_desc . ')';
 			}
 
-			$local_port_name = isset($if_map[$local_port_index]) ? $if_map[$local_port_index] : $local_port_index;
+			// Tenta converter o índice de porta local do LLDP para ifIndex usando o mapeamento do LLDP-MIB
+			$if_index = isset($lldp_loc_port_to_ifindex[$local_port_index]) 
+				? $lldp_loc_port_to_ifindex[$local_port_index] 
+				: $local_port_index;
+
+			$local_port_name = isset($if_map[$if_index]) ? $if_map[$if_index] : $local_port_index;
 			$local_port_display = ($local_port_name != $local_port_index) ? $local_port_name . ' (' . $local_port_index . ')' : $local_port_index;
 
 			$display_name = $neighbor_name;
