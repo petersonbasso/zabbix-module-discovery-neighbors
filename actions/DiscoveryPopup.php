@@ -18,7 +18,10 @@ class DiscoveryPopup extends CController {
 	 * @param string $message
 	 */
 	private function logDebug(string $message): void {
-		// Log desativado
+		// Mascara parâmetros sensíveis (como comunidade SNMP) antes de escrever no log de erros
+		$sanitized = preg_replace('/("community"\s*:\s*")[^"]+(")/i', '$1******$2', $message);
+		$sanitized = preg_replace('/(community=)[^&\s]+/i', '$1******', $sanitized);
+		error_log('[DiscoveryNeighbors] ' . $sanitized);
 	}
 
 
