@@ -204,8 +204,13 @@ class DiscoveryPopup extends CController {
 
 			// Tratamento de falha caso nenhum dado tenha sido retornado
 			if (empty($neighbors)) {
-				$error_message = $this->translate('snmp_read_error');
-				$this->logDebug("doAction: No network neighbors found.");
+				if (!empty($if_map)) {
+					$error_message = $this->translate('no_neighbors_found');
+					$this->logDebug("doAction: SNMP is active, but no network neighbors were found (discovery protocols might be disabled).");
+				} else {
+					$error_message = $this->translate('snmp_read_error');
+					$this->logDebug("doAction: SNMP query failed entirely (device offline or wrong credentials).");
+				}
 			} else {
 				// Mapeia os vizinhos a hosts existentes no Zabbix por Nome/IP
 				$neighbors = $zabbixApi->mapNeighborsToZabbixHosts($neighbors);
@@ -267,6 +272,10 @@ class DiscoveryPopup extends CController {
 			'snmp_read_error' => [
 				'pt' => 'Não foi possível ler dados SNMP do host. Verifique se o equipamento está online e se as credenciais de comunidade SNMP estão corretas.',
 				'en' => 'Unable to read SNMP data from host. Verify if the device is online and if the SNMP community credentials are correct.'
+			],
+			'no_neighbors_found' => [
+				'pt' => 'Nenhum vizinho de rede descoberto. Verifique se os protocolos de descoberta (LLDP, CDP ou EDP) estão ativos no equipamento.',
+				'en' => 'No network neighbors discovered. Verify if discovery protocols (LLDP, CDP, or EDP) are enabled on the device.'
 			],
 			'internal_error' => [
 				'pt' => 'Ocorreu um erro interno durante a consulta: ',
