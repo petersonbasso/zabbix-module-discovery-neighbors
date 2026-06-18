@@ -17,10 +17,12 @@ The module performs on-demand SNMP queries directly from the Zabbix web server t
 
 ### Host Context Menu Integration
 ![Host Context Menu Placeholder](screenshots/context_menu.png)
+
 *Integration with the native Zabbix context menu (under Links).*
 
 ### Interactive Topology & Table View
 ![Topology View Placeholder](screenshots/topology_view.png)
+
 *Interactive SVG graph showing LLDP/CDP/EDP neighbors, color-coded, with detailed connection mapping.*
 
 ---
