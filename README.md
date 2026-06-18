@@ -13,7 +13,6 @@ The module performs on-demand SNMP queries directly from the Zabbix web server t
 
 ## 📷 Screenshots
 
-> *Tip: Create a `screenshots` folder in your repository and replace these placeholders with your actual screenshots.*
 
 ### Host Context Menu Integration
 ![Host Context Menu Placeholder](screenshots/context_menu.png)
