@@ -3,6 +3,7 @@
 [![Zabbix Version](https://img.shields.io/badge/Zabbix-7.0%2B-blue.svg)](https://www.zabbix.com/)
 [![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-777bb4.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-ffdd00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/petersonbasso)
 
 **Discovery Neighbors Popup** is a native Zabbix frontend module that extends the host context menu to display, in real-time, the network neighbors connected to the host using link-discovery protocols (**LLDP**, **CDP**, and **EDP**).
 
@@ -105,6 +106,14 @@ Before deploying this module in your environment, please review these key points
 
 ---
 
+## ☕ Support the Project
+
+If this module was useful to you or your organization, please consider buying me a coffee to support its ongoing development, bug fixes, and new features!
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/petersonbasso)
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -112,3 +121,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 **Developed by:** [Peterson Basso](https://github.com/petersonbasso)
+
